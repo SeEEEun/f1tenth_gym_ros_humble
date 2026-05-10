@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM ros:foxy
+FROM ros:humble
 
 SHELL ["/bin/bash", "-c"]
 
@@ -32,7 +32,7 @@ RUN apt-get update --fix-missing && \
                        python3-pip \
                        libeigen3-dev \
                        tmux \
-                       ros-foxy-rviz2
+                       ros-humble-rviz2
 RUN apt-get -y dist-upgrade
 RUN pip3 install transforms3d
 
@@ -44,11 +44,24 @@ RUN cd f1tenth_gym && \
 # ros2 gym bridge
 RUN mkdir -p sim_ws/src/f1tenth_gym_ros
 COPY . /sim_ws/src/f1tenth_gym_ros
-RUN source /opt/ros/foxy/setup.bash && \
+RUN source /opt/ros/humble/setup.bash && \
     cd sim_ws/ && \
     apt-get update --fix-missing && \
-    rosdep install -i --from-path src --rosdistro foxy -y && \
+    rosdep install -i --from-path src --rosdistro humble -y && \
     colcon build
 
 WORKDIR '/sim_ws'
 ENTRYPOINT ["/bin/bash"]
+
+# 추가 패키지
+RUN apt-get update && apt-get install -y \
+    ros-humble-slam-toolbox \
+    ros-humble-nav2-map-server \
+    ros-humble-nav2-lifecycle-manager \
+    ros-humble-ackermann-msgs \
+    ros-humble-teleop-twist-keyboard \
+    ros-humble-joint-state-publisher \
+    ros-humble-xacro \
+    ros-humble-cartographer \
+    ros-humble-cartographer-ros && \
+    pip3 install casadi matplotlib scipy
